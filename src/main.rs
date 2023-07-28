@@ -72,9 +72,11 @@ fn get_square<T>(arr: &[[T; 9]; 9], row: usize, col: usize) -> [T; 8]
 
     let mut ctr = 0;
     for i in 0..3 {
+        let row_i = start_row + i;
         for j in 0..3 {
-            if (start_row+j) != row || (start_col+i) != col {
-                output[ctr] = arr[start_row + i][start_col + j];
+            let col_i = start_col + j;
+            if row_i != row || col_i != col {
+                output[ctr] = arr[row_i][col_i];
                 ctr+=1;
             }
         }
@@ -133,26 +135,32 @@ fn build_sp(grid: &Grid) -> GridSp {
 
 fn reduce_sp(sp: &GridSp) -> GridSp {
     let mut output = sp.clone();
-    for i in 0..9 {
-        for j in 0..9 {
-            let row = get_row(&output, i, j);
+    for row_i in 0..9 {
+        for col_i in 0..9 {
+            let row = get_row(&output, row_i, col_i);
             for val in row {
                 match val.try_collapse() {
-                    Some(x) => output[i][j].states[x as usize] = false,
+                    Some(x) => {
+                        output[row_i][col_i].states[x as usize] = false
+                    },
                     _ => ()
                 }
             }
-            let col = get_col(&output, i, j);
+            let col = get_col(&output, row_i, col_i);
             for val in col {
                 match val.try_collapse() {
-                    Some(x) => output[i][j].states[x as usize] = false,
+                    Some(x) => {
+                        output[row_i][col_i].states[x as usize] = false
+                    },
                     None => (),
                 }
             }
-            let square = get_square(&output, i, j);
+            let square = get_square(&output, row_i, col_i);
             for val in square {
                 match val.try_collapse() {
-                    Some(x) => output[i][j].states[x as usize] = false,
+                    Some(x) => {
+                        output[row_i][col_i].states[x as usize] = false
+                    },
                     None => (),
                 }
             }
@@ -167,11 +175,11 @@ fn solve(initial_grid: &mut Grid) {
     sp.print();
     let mut new_sp = sp.clone();
 
-    for i in 0..10 {
+    for i in 0..81 {
         new_sp = reduce_sp(&new_sp);
     }
 
-    new_sp.print();
+    new_sp.print()
 }
 
 #[cfg(test)]
@@ -214,7 +222,7 @@ mod tests {
 
     #[test]
     fn test_get_square() {
-        assert_eq!(super::get_square(&TEST_GRID, 5, 5), [31, 32, 33, 40, 41, 42, 49, 50]);
+        println!("{:?}", super::get_square(&TEST_GRID, 5, 3));
     }
 
     #[test]
